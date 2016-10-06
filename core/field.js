@@ -218,6 +218,14 @@ Blockly.Field.prototype.setVisible = function(visible) {
 };
 
 /**
+ * Sets a new change handler for editable fields.
+ * @param {Function} handler New change handler, or null.
+ */
+Blockly.Field.prototype.setChangeHandler = function(handler) {
+  this.changeHandler_ = handler;
+};
+
+/**
  * Sets a new validation function for editable fields.
  * @param {Function} handler New validation function, or null.
  */
@@ -405,6 +413,22 @@ Blockly.Field.prototype.setValue = function(newText) {
         this.sourceBlock_, 'field', this.name, oldText, newText));
   }
   this.setText(newText);
+};
+
+/**
+ * Gets private data associated with this field
+ * @return {Object} Current private data.
+ */
+Blockly.Field.prototype.getPrivate = function() {
+  return this.privateData_;
+};
+
+/**
+ * Stores private data associated with this field.
+ * @param {Object} privateData Data to be stored for later retrieval.
+ */
+Blockly.Field.prototype.setPrivate = function(privateData) {
+  this.privateData_ = privateData;
 };
 
 /**

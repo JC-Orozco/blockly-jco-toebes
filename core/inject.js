@@ -103,6 +103,7 @@ Blockly.parseOptions_ = function(options) {
     var hasComments = false;
     var hasDisable = false;
     var hasSounds = false;
+    var useMutators = false;
   } else {
     var languageTree = Blockly.parseToolboxTree_(options['toolbox']);
     var hasCategories = Boolean(languageTree &&
@@ -126,6 +127,10 @@ Blockly.parseOptions_ = function(options) {
     var hasSounds = options['sounds'];
     if (hasSounds === undefined) {
       hasSounds = true;
+    }
+    var useMutators = options['mutators'];
+    if (useMutators === undefined) {
+      useMutators = false;
     }
   }
   var hasScrollbars = options['scrollbars'];

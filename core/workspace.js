@@ -290,6 +290,14 @@ Blockly.Workspace.prototype.fireChangeListener = function(event) {
 };
 
 /**
+ * Something on this workspace has changed.
+ * TODO JCOA: Use Event.fire? to enable undo and redo
+ */
+Blockly.Workspace.prototype.fireChangeEvent = function() {
+  // NOP.
+};
+
+/**
  * Database of all workspaces.
  * @private
  */

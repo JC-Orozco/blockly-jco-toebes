@@ -62,10 +62,16 @@ Blockly.Blocks['lists_create_with'] = {
   init: function() {
     this.setHelpUrl(Blockly.Msg.LISTS_CREATE_WITH_HELPURL);
     this.setColour(Blockly.Blocks.lists.HUE);
-    this.itemCount_ = 3;
+    if (this.workspace.options.useMutators) {
+      this.setMutator(new Blockly.Mutator(['lists_create_with_item']));
+    } else {
+      this.appendAddSubGroup(Blockly.Msg.LISTS_CREATE_WITH_INPUT_WITH, 'items',
+                           null,
+                           Blockly.Msg.LISTS_CREATE_EMPTY_TITLE);
+    }
+    this.itemCount_ = 1;
     this.updateShape_();
     this.setOutput(true, 'Array');
-    this.setMutator(new Blockly.Mutator(['lists_create_with_item']));
     this.setTooltip(Blockly.Msg.LISTS_CREATE_WITH_TOOLTIP);
   },
   /**
