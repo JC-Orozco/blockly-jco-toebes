@@ -64,13 +64,13 @@ Blockly.Blocks['maps_create_with'] = {
   init: function() {
     this.setHelpUrl(Blockly.Msg.MAPS_CREATE_WITH_HELPURL);
     this.setColour(Blockly.Blocks.maps.HUE);
-    // if (this.workspace.options.useMutators) {
+    if (this.workspace.options.useMutators) {
       this.setMutator(new Blockly.Mutator(['maps_create_with_item']));
-    // } else {
-    //  this.appendAddSubGroup(Blockly.Msg.MAPS_CREATE_WITH_INPUT_WITH, 'items',
-    //                       null,
-    //                       Blockly.Msg.MAPS_CREATE_EMPTY_TITLE);
-    //}
+    } else {
+      this.appendAddSubGroup(Blockly.Msg.MAPS_CREATE_WITH_INPUT_WITH, 'items',
+                           null,
+                           Blockly.Msg.MAPS_CREATE_EMPTY_TITLE);
+    }
     this.itemCount_ = 1;
     this.updateShape_();
     this.setOutput(true, 'Map');
