@@ -33,34 +33,70 @@ Blockly.JavaScript['maps_create_empty'] = function(block) {
   return ['{}', Blockly.JavaScript.ORDER_ATOMIC];
 };
 
+// Blockly.JavaScript['maps_create_with'] = function(block) {
+//   // Create a map with any number of elements of any type.
+//   var declVar = Blockly.JavaScript.variableDB_.getDistinctName(
+//       'hashMap', Blockly.Variables.NAME_TYPE);
+//   var declCode = 'var ' + declVar + ' = {};\n';
+//   Blockly.JavaScript.stashStatement(declCode);
+//   for (var n = 0; n < block.itemCount_; n++) {
+//     var inputName = 'ADD' + n;
+//     // var inputName = 'items' + n;
+//     var inputBlock = block.getInputTargetBlock(inputName);
+//     if (inputBlock) {
+//       if (inputBlock.type === 'maps_create') {
+//         var val = Blockly.JavaScript.valueToCode(inputBlock, 'VAL',
+//             Blockly.JavaScript.ORDER_NONE) || 'null';
+//         var key = Blockly.JavaScript.valueToCode(inputBlock, 'KEY',
+//             Blockly.JavaScript.ORDER_NONE) || '""';
+//         declCode = declVar + "[" + key + "] = " + val + ";\n";
+//         Blockly.JavaScript.stashStatement(declCode);
+//       } else {
+//         var itemCode = Blockly.JavaScript.valueToCode(block, inputName,
+//             Blockly.JavaScript.ORDER_NONE);
+//         if (itemCode) { //this is assuming jquery is available
+//           declCode = '$.extend({}, '+declVar + ', ' + itemCode + ');\n';
+//           Blockly.JavaScript.stashStatement(declCode);
+//         }
+//       }
+//     }
+//   }
+//   return [declVar, Blockly.JavaScript.ORDER_ATOMIC];
+// };
+
 Blockly.JavaScript['maps_create_with'] = function(block) {
   // Create a map with any number of elements of any type.
-  var declVar = Blockly.JavaScript.variableDB_.getDistinctName(
-      'hashMap', Blockly.Variables.NAME_TYPE);
-  var declCode = declVar + ' = {};\n';
-  Blockly.JavaScript.stashStatement(declCode);
+  //var text_name = block.getFieldValue('NAME');
+  //var code_text = 'var '+text_name+' = {\n'
+  var code = new Array(block.itemCount_);
   for (var n = 0; n < block.itemCount_; n++) {
-    var inputName = 'ADD' + n;
-    var inputBlock = block.getInputTargetBlock(inputName);
-    if (inputBlock) {
-      if (inputBlock.type === 'maps_create') {
-        var val = Blockly.JavaScript.valueToCode(inputBlock, 'VAL',
-            Blockly.JavaScript.ORDER_NONE) || 'null';
-        var key = Blockly.JavaScript.valueToCode(inputBlock, 'KEY',
-            Blockly.JavaScript.ORDER_NONE) || '""';
-        declCode = declVar + "[" + key + "] = " + val + ";\n";
-        Blockly.JavaScript.stashStatement(declCode);
-      } else {
-        var itemCode = Blockly.JavaScript.valueToCode(block, inputName,
-            Blockly.JavaScript.ORDER_NONE);
-        if (itemCode) { //this is assuming jquery is available
-          declCode = '$.extend({}, '+declVar + ', ' + itemCode + ');\n';
-          Blockly.JavaScript.stashStatement(declCode);
-        }
-      }
-    }
+    code[n] = Blockly.JavaScript.valueToCode(block, 'ADD' + n,
+        Blockly.JavaScript.ORDER_COMMA) || 'null';
+    // TODO: Fix the naming on the AddSubGroup block and use code above
+    // code[n] = Blockly.JavaScript.valueToCode(block, 'items' + n,
+    //     Blockly.JavaScript.ORDER_COMMA) || 'null';
+
+    // var inputName = 'ADD' + n;
+    // // var inputName = 'items' + n;
+    // var inputBlock = block.getInputTargetBlock(inputName);
+    // if (inputBlock) {
+    //   if (inputBlock.type === 'maps_create') {
+    //     var val = Blockly.JavaScript.valueToCode(inputBlock, 'VAL',
+    //         Blockly.JavaScript.ORDER_NONE) || 'null';
+    //     var key = Blockly.JavaScript.valueToCode(inputBlock, 'KEY',
+    //         Blockly.JavaScript.ORDER_NONE) || '""';
+    //     // TODO: JCOA, why do we need to do this again if maps_create already does this. Maybe only use the value from that block.
+    //     if(n < block.itemCount_-1){
+    //       code += "  " + key + ": " + val + ",\n";
+    //     }else{
+    //       code += "  " + key + ": " + val + "\n";
+    //     }
+    //   }
+    // }
   }
-  return [declVar, Blockly.JavaScript.ORDER_ATOMIC];
+  var code_text = '{' + code.join(', ') + '}';
+  //return code_text;
+  return [code_text, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
 Blockly.JavaScript['maps_length'] = function(block) {
@@ -87,13 +123,16 @@ Blockly.JavaScript['maps_create'] = function(block) {
       Blockly.JavaScript.ORDER_NONE) || 'null';
   var key = Blockly.JavaScript.valueToCode(block, 'KEY',
       Blockly.JavaScript.ORDER_NONE) || '""';
-  var declVar = Blockly.JavaScript.variableDB_.getDistinctName(
-      'hashMap', Blockly.Variables.NAME_TYPE);
+  //var declVar = Blockly.JavaScript.variableDB_.getDistinctName(
+  //    'hashMap', Blockly.Variables.NAME_TYPE);
 
-  var declCode = declVar + ' = {};\n' +
-      declVar + '[' + key + '] = ' + val + ';\n';
-  Blockly.JavaScript.stashStatement(declCode);
-  return [declVar, Blockly.JavaScript.ORDER_LOGICAL_NOT];
+  //var declCode = declVar + ' = {};\n' +
+  //    declVar + '[' + key + '] = ' + val + ';\n';
+  //Blockly.JavaScript.stashStatement(declCode);
+  //return [declVar, Blockly.JavaScript.ORDER_LOGICAL_NOT];
+  var code = key + ": " + val;
+  //return [code, Blockly.JavaScript.ORDER_LOGICAL_NOT];
+  return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
 Blockly.JavaScript['maps_getIndex'] = function(block) {

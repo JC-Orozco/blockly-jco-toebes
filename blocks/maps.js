@@ -55,15 +55,17 @@ Blockly.Blocks['maps_create_empty'] = {
   typeblock: Blockly.Msg.MAPS_CREATE_EMPTY_TYPEBLOCK
 };
 
-
 Blockly.Blocks['maps_create_with'] = {
   /**
    * Block for creating a list with any number of elements of any type.
    * @this Blockly.Block
    */
   init: function() {
+    // this.appendDummyInput()
+    //     .appendField("");
     this.setHelpUrl(Blockly.Msg.MAPS_CREATE_WITH_HELPURL);
     this.setColour(Blockly.Blocks.maps.HUE);
+    //this.setMutator(new Blockly.Mutator(['maps_create_with_item']));
     if (this.workspace.options.useMutators) {
       this.setMutator(new Blockly.Mutator(['maps_create_with_item']));
     } else {
@@ -74,6 +76,8 @@ Blockly.Blocks['maps_create_with'] = {
     this.itemCount_ = 1;
     this.updateShape_();
     this.setOutput(true, 'Map');
+    // this.setPreviousStatement(true, null);
+    // this.setNextStatement(true, null);
     this.setTooltip(Blockly.Msg.MAPS_CREATE_WITH_TOOLTIP);
   },
   getAddSubName: function(name,pos) {

@@ -20,9 +20,6 @@
 /**
  * @fileoverview The class representing one block.
  * @author fraser@google.com (Neil Fraser)
- * Modified and improved by jorozconews@gmail.com (Juan Carlos Orozco):
- *   Imported AddSubGroup from toebes-extreme
- *   updated to include AsdSubStatement, also Undo and Redo.
  */
 'use strict';
 
@@ -1108,26 +1105,6 @@ Blockly.Block.prototype.interpolate_ = function(message, args, lastDummyAlign) {
                                        element['name'],
                                        element['checks']);
             break;
-          case 'input_addsubnameded': // JCOA
-            // If there are any pending fields, make sure we put them on an
-            // input so that the AddSubGroup renders correctly
-            if (fieldStack.length) {
-              input = this.appendDummyInput();
-            }
-            this.appendAddSubStatement(element['title'],
-                                       element['name'],
-                                       element['checks']);
-            break;          
-          case 'input_addsubnamed': // JCOA
-            // If there are any pending fields, make sure we put them on an
-            // input so that the AddSubGroup renders correctly
-            if (fieldStack.length) {
-              input = this.appendDummyInput();
-            }
-            this.appendAddSubStatement(element['title'],
-                                       element['name'],
-                                       element['checks']);
-            break;          
           case 'field_label':
             field = new Blockly.FieldLabel(element['text'], element['class']);
             break;
@@ -1443,9 +1420,6 @@ Blockly.Block.prototype.subPng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA
  * @param {!Blockly.FieldClickImage} field Field which was clicked on
  */
 Blockly.Block.prototype.doAddField = function(field) {
-  var oldMutationDom = this.mutationToDom();
-  var oldMutation = oldMutationDom && Blockly.Xml.domToText(oldMutationDom);
-
   var privateData = field.getPrivate();
   var name = privateData.name;
   var pos = privateData.pos;
@@ -1460,22 +1434,6 @@ Blockly.Block.prototype.doAddField = function(field) {
     this.removeInput(this.getAddSubName(name,0),true);
   }
   this.updateAddSubShape();
-
-  var newMutationDom = this.mutationToDom();
-  var newMutation = newMutationDom && Blockly.Xml.domToText(newMutationDom);
-  if (oldMutation != newMutation) {
-    Blockly.Events.fire(new Blockly.Events.Change(
-        this, 'mutation', name, oldMutation, newMutation));
-    //  this, 'mutation', null, oldMutation, newMutation));
-    // Ensure that any bump is part of this mutation's event group.
-    var group = Blockly.Events.getGroup();
-    var block = this;
-    setTimeout(function() {
-        Blockly.Events.setGroup(group);
-        block.bumpNeighbours_();
-        Blockly.Events.setGroup(false);
-    }, Blockly.BUMP_DELAY);
-  }
 };
 
 /**
@@ -1483,9 +1441,6 @@ Blockly.Block.prototype.doAddField = function(field) {
  * @param {!Blockly.FieldClickImage} field Field which was clicked on
  */
 Blockly.Block.prototype.doRemoveField = function(field) {
-  var oldMutationDom = this.mutationToDom();
-  var oldMutation = oldMutationDom && Blockly.Xml.domToText(oldMutationDom);
-
   var privateData = field.getPrivate();
   var name = privateData.name;
   var pos = privateData.pos;
@@ -1523,22 +1478,6 @@ Blockly.Block.prototype.doRemoveField = function(field) {
     }
   }
   this.updateAddSubShape();
-
-  var newMutationDom = this.mutationToDom();
-  var newMutation = newMutationDom && Blockly.Xml.domToText(newMutationDom);
-  if (oldMutation != newMutation) {
-    Blockly.Events.fire(new Blockly.Events.Change(
-        this, 'mutation', name, oldMutation, newMutation));
-    //  this, 'mutation', null, oldMutation, newMutation));
-    // Ensure that any bump is part of this mutation's event group.
-    var group = Blockly.Events.getGroup();
-    var block = this;
-    setTimeout(function() {
-        Blockly.Events.setGroup(group);
-        block.bumpNeighbours_();
-        Blockly.Events.setGroup(false);
-    }, Blockly.BUMP_DELAY);
-  }
 };
 
 /**
@@ -1629,14 +1568,12 @@ Blockly.Block.prototype.appendAddSubInput = function(name,pos,title) {
   //   field.setChangeHandler(this.doAddField);
   // }
   // else {
-  if(itemCount[name]>0){
     field = new Blockly.FieldClickImage(this.subPng, 17, 17,
                                         Blockly.Msg.CLICK_REMOVE_TOOLTIP);
     field.setChangeHandler(this.doRemoveField);
-    field.setPrivate({name: name, pos: pos});
-    inputItem.appendField(field);
-  }
   // }
+  field.setPrivate({name: name, pos: pos});
+  inputItem.appendField(field);
   return [inputItem];
 };
 
@@ -1734,14 +1671,12 @@ Blockly.Block.prototype.updateAddSubShape = function() {
   if (this.rendered) {
     this.render();
     this.bumpNeighbours_();
-    // TODO JCOA: Use Event.fire? to enable undo and redo. Blockly.Events.fire(new Blockly.Events.Change(
-    //this.workspace.fireChangeEvent();
+    this.workspace.fireChangeEvent();
     //this.workspace.fireChangeListener();
   }
 };
 
 // TODO: JCOA Fix domToMutationAddSub and mutationToDomAddSub using normal mutation function
-//       Maybe not possible since AddSub can delete fields by name and reorder the list.
 /**
   * Parse XML to restore the list inputs.
   * @param {!Element} xmlElement XML storage element.
@@ -1863,9 +1798,6 @@ Blockly.Block.prototype.appendAddSubEmptyStatementInput = function(name,title) {
  * @param {!Blockly.FieldClickImage} field Field which was clicked on
  */
 Blockly.Block.prototype.doAddStatementField = function(field) {
-  var oldMutationDom = this.mutationToDom();
-  var oldMutation = oldMutationDom && Blockly.Xml.domToText(oldMutationDom);
-
   var privateData = field.getPrivate();
   var name = privateData.name;
   var pos = privateData.pos;
@@ -1880,22 +1812,6 @@ Blockly.Block.prototype.doAddStatementField = function(field) {
     this.removeInput(this.getAddSubName(name,0),true);
   }
   this.updateAddSubStatementShape();
-
-  var newMutationDom = this.mutationToDom();
-  var newMutation = newMutationDom && Blockly.Xml.domToText(newMutationDom);
-  if (oldMutation != newMutation) {
-    Blockly.Events.fire(new Blockly.Events.Change(
-        this, 'mutation', name, oldMutation, newMutation));
-    //  this, 'mutation', null, oldMutation, newMutation));
-    // Ensure that any bump is part of this mutation's event group.
-    var group = Blockly.Events.getGroup();
-    var block = this;
-    setTimeout(function() {
-        Blockly.Events.setGroup(group);
-        block.bumpNeighbours_();
-        Blockly.Events.setGroup(false);
-    }, Blockly.BUMP_DELAY);
-  }
 };
 
 /**
@@ -1903,9 +1819,6 @@ Blockly.Block.prototype.doAddStatementField = function(field) {
  * @param {!Blockly.FieldClickImage} field Field which was clicked on
  */
 Blockly.Block.prototype.doRemoveStatementField = function(field) {
-  var oldMutationDom = this.mutationToDom();
-  var oldMutation = oldMutationDom && Blockly.Xml.domToText(oldMutationDom);
-
   var privateData = field.getPrivate();
   var name = privateData.name;
   var pos = privateData.pos;
@@ -1943,22 +1856,6 @@ Blockly.Block.prototype.doRemoveStatementField = function(field) {
     }
   }
   this.updateAddSubStatementShape();
-
-  var newMutationDom = this.mutationToDom();
-  var newMutation = newMutationDom && Blockly.Xml.domToText(newMutationDom);
-  if (oldMutation != newMutation) {
-    Blockly.Events.fire(new Blockly.Events.Change(
-        this, 'mutation', name, oldMutation, newMutation));
-    //  this, 'mutation', null, oldMutation, newMutation));
-    // Ensure that any bump is part of this mutation's event group.
-    var group = Blockly.Events.getGroup();
-    var block = this;
-    setTimeout(function() {
-        Blockly.Events.setGroup(group);
-        block.bumpNeighbours_();
-        Blockly.Events.setGroup(false);
-    }, Blockly.BUMP_DELAY);
-  }
 };
 
 
@@ -1990,20 +1887,18 @@ Blockly.Block.prototype.appendAddSubStatementInput = function(name,pos,title) {
     inputItem = this.appendAddSubEmptyStatementInput(newName, title);
     //x/inputItem = this.appendDummyInput(); // TODO: Add title to block
   }
-  // if (pos === 0) {
-  //   // field = new Blockly.FieldClickImage(this.addPng, 17, 17,
-  //   //                                     Blockly.Msg.CLICK_ADD_TOOLTIP);
-  //   // field.setChangeHandler(this.doAddStatementField);
-  // } else {
-  if(itemCount[name]>0){
+  if (pos === 0) {
+    // field = new Blockly.FieldClickImage(this.addPng, 17, 17,
+    //                                     Blockly.Msg.CLICK_ADD_TOOLTIP);
+    // field.setChangeHandler(this.doAddStatementField);
+  } else {
     field = new Blockly.FieldClickImage(this.subPng, 17, 17,
                                         Blockly.Msg.CLICK_REMOVE_TOOLTIP);
     field.setChangeHandler(this.doRemoveStatementField);
+    // JCOA: Because we are not addign fields on the pos === 0 case we need this 2 statements here:
     field.setPrivate({name: name, pos: pos});
     inputItem.appendField(field);
   }
-  // JCOA: Because we are not addign fields on the pos === 0 case we need this 2 statements here:
-  // }
   // field.setPrivate({name: name, pos: pos});
   // inputItem.appendField(field);
   return [inputItem];
@@ -2103,7 +1998,7 @@ Blockly.Block.prototype.updateAddSubStatementShape = function() {
   if (this.rendered) {
     this.render();
     this.bumpNeighbours_();
-    //this.workspace.fireChangeEvent();
+    this.workspace.fireChangeEvent();
     //this.workspace.fireChangeListener();
   }
 };
@@ -2177,586 +2072,4 @@ Blockly.Block.prototype.appendAddSubStatement = function(title,name,checks,
       .appendField(field);
 
   this.appendAddSubStatementInput(name, 0, title);
-};
-
-///////////////////////////
-/**
- * Adds a named field to a mutable block.
- * @param {!Blockly.FieldClickImage} field Field which was clicked on
- */
-Blockly.Block.prototype.doAddFieldNamedEd = function(field) {
-  var oldMutationDom = this.mutationToDom();
-  var oldMutation = oldMutationDom && Blockly.Xml.domToText(oldMutationDom);
-
-  var privateData = field.getPrivate();
-  var name = privateData.name;
-  var pos = privateData.pos;
-  var itemCount = this.getItemCount();
-  itemCount[name]++;
-
-  this.setItemCount(name, itemCount[name]);
-  if (itemCount[name] == 1) {
-    //
-    // If we went from 0 to 1 then we need to change the title back.
-    // Just remove the input and let updateAddSubShape clean it up for us
-    this.removeInput(this.getAddSubName(name,0),true);
-  }
-  this.updateAddSubNamedEdShape();
-
-  var newMutationDom = this.mutationToDom();
-  var newMutation = newMutationDom && Blockly.Xml.domToText(newMutationDom);
-  if (oldMutation != newMutation) {
-    Blockly.Events.fire(new Blockly.Events.Change(
-        this, 'mutation', name, oldMutation, newMutation));
-    //  this, 'mutation', null, oldMutation, newMutation));
-    // Ensure that any bump is part of this mutation's event group.
-    var group = Blockly.Events.getGroup();
-    var block = this;
-    setTimeout(function() {
-        Blockly.Events.setGroup(group);
-        block.bumpNeighbours_();
-        Blockly.Events.setGroup(false);
-    }, Blockly.BUMP_DELAY);
-  }
-};
-
-/**
- * Removes a named field from a mutable block.
- * @param {!Blockly.FieldClickImage} field Field which was clicked on
- */
-Blockly.Block.prototype.doRemoveFieldNamedEd = function(field) {
-  var oldMutationDom = this.mutationToDom();
-  var oldMutation = oldMutationDom && Blockly.Xml.domToText(oldMutationDom);
-
-  var privateData = field.getPrivate();
-  var name = privateData.name;
-  var pos = privateData.pos;
-  var itemCount = this.getItemCount();
-  var limit = itemCount[name];
-  var minitems = 1;
-  if (this.titles_[name]) {
-    minitems = 0;
-  }
-  if (itemCount[name] > minitems) {
-    itemCount[name]--;
-    this.setItemCount(name, itemCount[name]);
-  }
-  if (itemCount[name] == 0) {
-    // If we drop down to 0 then we remove the block and let redraw
-    // give us back one with the right name on it
-    this.removeInput(this.getAddSubName(name,0),true);
-  }
-
-  var input = this.getInput(this.getAddSubName(name,pos));
-  if (input && input.connection && input.connection.targetConnection) {
-    input.connection.targetConnection.sourceBlock_.unplug(true,true);
-  }
-  // Now we need to go through and move up all the lower ones to the previous
-  // one.
-  for (var slot = pos+1; slot < limit; slot++) {
-    var nextInput = this.getInput(this.getAddSubName(name,slot));
-    if (nextInput != null) {
-      if (nextInput.connection && nextInput.connection.targetConnection) {
-        var toMove = nextInput.connection.targetConnection;
-        toMove.sourceBlock_.unplug(false,false);
-        input.connection.connect(toMove);
-      }
-    input = nextInput;
-    }
-  }
-  this.updateAddSubNamedEdShape();
-
-  var newMutationDom = this.mutationToDom();
-  var newMutation = newMutationDom && Blockly.Xml.domToText(newMutationDom);
-  if (oldMutation != newMutation) {
-    Blockly.Events.fire(new Blockly.Events.Change(
-        this, 'mutation', name, oldMutation, newMutation));
-    //  this, 'mutation', null, oldMutation, newMutation));
-    // Ensure that any bump is part of this mutation's event group.
-    var group = Blockly.Events.getGroup();
-    var block = this;
-    setTimeout(function() {
-        Blockly.Events.setGroup(group);
-        block.bumpNeighbours_();
-        Blockly.Events.setGroup(false);
-    }, Blockly.BUMP_DELAY);
-  }
-};
-
-/**
- * Creates the empty item for an addsub block
- * @param {string} name The name of the input type field.
- * @return {array Element} array of added elements.
- */
-Blockly.Block.prototype.appendAddSubNamedEdEmptyInput = function(name,title) {
-  var inputItem = this.appendDummyInput(name);
-  if (title) {
-    inputItem.appendField(title);
-  }
-  return inputItem;
-};
-
-/**
- * Updates the shape of a mutable block.
- * @param {string} name The name of the input type field.
- * @param {number} pos position of the field
- * @return {array Element} array of added elements.
- */
-Blockly.Block.prototype.appendAddSubNamedEdInput = function(name,pos,title) {
-  var newName = this.getAddSubName(name,pos);
-  var inputItem = null;
-  var field = null;
-  var itemCount = this.getItemCount();
-
-  if (itemCount[name]) {
-    inputItem = this.appendValueInput(newName)
-                    .setCheck(this.checks_[name],!!this.checks_[name])
-                    .setAlign(Blockly.ALIGN_RIGHT);
-    if (title) {
-      inputItem.appendField(title);
-    }
-    inputItem.appendField(new Blockly.FieldTextInput(newName), newName);
-  } else {
-    var title = '';
-    if (this.titles_[name]) {
-      title = this.titles_[name].empty;
-    }
-    inputItem = this.appendAddSubNamedEdEmptyInput(newName, title);
-  }
-  // if (pos === 0) {
-  //   field = new Blockly.FieldClickImage(this.addPng, 17, 17,
-  //                                       Blockly.Msg.CLICK_ADD_TOOLTIP);
-  //   field.setChangeHandler(this.doAddFieldNamedEd);
-  // }
-  // else {
-  if(itemCount[name]>0){
-    field = new Blockly.FieldClickImage(this.subPng, 17, 17,
-                                        Blockly.Msg.CLICK_REMOVE_TOOLTIP);
-    field.setChangeHandler(this.doRemoveField);
-    field.setPrivate({name: name, pos: pos});
-    inputItem.appendField(field);
-  }
-  // }
-  return [inputItem];
-};
-
-/**
- * Updates the shape of a mutable block.
- * @param {string} name The name of the input type field.
- * @param {number} pos position of the field to be removed
- * @throws {goog.asserts.AssertionError} if the field is not present.
- */
-Blockly.Block.prototype.updateAddSubNamedEdShape = function() {
-  var itemCount = this.getItemCount();
-  for (var name in itemCount) {
-    if (itemCount.hasOwnProperty(name)) {
-      // First get rid of anything which is beyond our count
-      var pos = itemCount[name];
-      var elemName = this.getAddSubName(name,pos);
-      while(this.getInput(elemName) != null) {
-        this.removeInput(elemName);
-        pos++;
-        elemName = this.getAddSubName(name,pos);
-      }
-      if (itemCount[name]) {
-        // Now add in the ones which we are missing.  Note that
-        // we need to make sure that they get put AFTER the one of
-        // the same number
-        var name0 = this.getAddSubName(name,0);
-        var inputIndex = this.getInputIndex(name0);
-        if (inputIndex == -1) {
-          // This is the case where we don't have any blocks at all, not even
-          // the initial one, so we just add to the end
-          var title = '';
-          if (this.titles_[name]) {
-            title = this.titles_[name].normal;
-          }
-          this.appendAddSubNamedEdInput(name, 0, title);
-          var inputIndex = this.getInputIndex(name0);
-          goog.asserts.assert(inputIndex != -1,
-                              'Named input "%s" not found.', name0);
-        }
-        if (inputIndex !== -1) {
-          inputIndex++;
-          for (pos = 1; pos < itemCount[name];pos++,inputIndex++) {
-            var newName = this.getAddSubName(name,pos);
-            var inputItem = this.getInput(newName);
-            if (inputItem == null) {
-              // We have to add one
-              var inputItems = this.appendAddSubNamedEdInput(name,pos);
-              // Now see if we need to move them.
-              if (inputIndex < this.inputList.length-1) {
-                // We move them from the bottom to the top.
-                // Because they start at the bottom, we move them to the same
-                // place and they will stay in the same order.
-                for (var nItem = 0; nItem < inputItems.length; nItem++) {
-                  this.moveNumberedInputBefore(this.inputList.length-1,
-                                               inputIndex);
-                }
-              }
-            }
-          }
-        }
-
-        inputItem = this.getInput(name0);
-        var subFieldName0 = name0+'_sub';
-        var hasSubField0 = this.getField(subFieldName0);
-        // Now see what the main one has for fields
-        // if (itemCount[name] === 1) {
-        //   // Shouldn't have a sub field if this is the only entry
-        //   if (hasSubField0) {
-        //     inputItem.removeField(subFieldName0);
-        //   }
-        // } else {
-        //   if (!hasSubField0) {
-        //     var field = new Blockly.FieldClickImage(this.subPng, 17, 17,
-        //                                       Blockly.Msg.CLICK_REMOVE_TOOLTIP);
-        //     field.setPrivate({name: name, pos: 0});
-        //     field.setChangeHandler(this.doRemoveField);
-        //     inputItem.appendField(field, subFieldName0);
-        //   }
-        // }
-      } else {
-        var name0 = this.getAddSubName(name,0);
-        var title = '';
-        if (this.titles_[name]) {
-          title = this.titles_[name].empty;
-        }
-        this.removeInput(name0,true);
-        this.appendAddSubNamedEdInput(name, 0, title);
-      }
-    }
-  }
-  //
-  // Make sure that we don't have anything which might be showing up
-  // as a false connection
-  //
-  if (this.rendered) {
-    this.render();
-    this.bumpNeighbours_();
-    // TODO JCOA: Use Event.fire? to enable undo and redo. Blockly.Events.fire(new Blockly.Events.Change(
-    //this.workspace.fireChangeEvent();
-    //this.workspace.fireChangeListener();
-  }
-};
-
-// TODO: JCOA Fix domToMutationAddSub and mutationToDomAddSub using normal mutation function
-//       Maybe not possible since AddSub can delete fields by name and reorder the list.
-/**
-  * Parse XML to restore the list inputs.
-  * @param {!Element} xmlElement XML storage element.
-  * @this Blockly.Block
-  */
-Blockly.Block.prototype.domToMutationAddSubNamedEd = function(xmlElement) {
-  var itemCount = this.getItemCount();
-  for (var name in itemCount) {
-    if (itemCount.hasOwnProperty(name)) {
-      this.setItemCount(name, parseInt(xmlElement.getAttribute(name),10));
-    }
-  }
-  this.updateAddSubNamedEdShape();
-};
-
-/**
- * Create XML to represent list inputs.
- * @return {Element} XML storage element.
- * @this Blockly.Block
- */
-Blockly.Block.prototype.mutationToDomAddSubNamedEd = function() {
-  var container = document.createElement('mutation');
-  var itemCount = this.getItemCount();
-  for (var name in itemCount) {
-    if (itemCount.hasOwnProperty(name)) {
-      container.setAttribute(name, itemCount[name]);
-    }
-  }
-  return container;
-};
-
-/**
- * Creates an add/subtract mutable field.
- * @param {string} title Any title input fields for the line.
- * @param {string} name The name of the input type field.
- * @param {string} checks input check parameter for the fields
- * @param {string} emptytitle Optional string for when a group is empty
- */
-Blockly.Block.prototype.appendAddSubNamedEd = function(title,name,checks,
-                                                     emptytitle) {
-  //
-  // Specify the override functions
-  //
-  this.domToMutation   = this.domToMutationAddSubNamedEd;
-  this.mutationToDom   = this.mutationToDomAddSubNamedEd;
-  this.updateShape_    = this.updateAddSubNamedEdShape;
-
-  var root = this;
-  if (typeof this.titles_ === 'undefined') {
-    this.checks_ = {};
-    this.titles_ = {};
-  }
-
-  if (emptytitle) {
-    this.titles_[name] = {normal: title, empty: emptytitle};
-  }
-  this.setItemCount(name, 1);
-  this.checks_[name] = checks;
-
-  // This adds an extra plus button
-  var field = null;
-  field = new Blockly.FieldClickImage(this.addPng, 17, 17,
-                                      Blockly.Msg.CLICK_ADD_TOOLTIP);
-  field.setChangeHandler(this.doAddFieldNamedEd);
-  field.setPrivate({name: name, pos: 0});
-  this.appendDummyInput()
-      .appendField(field)
-      .appendField("  ");
-
-  this.appendAddSubNamedEdInput(name, 0, title);
-};
-
-///////////////////////////
-/**
- * Creates the empty item for an addsub block
- * @param {string} name The name of the input type field.
- * @return {array Element} array of added elements.
- */
-Blockly.Block.prototype.appendAddSubNamedEmptyInput = function(name,title) {
-  var inputItem = this.appendDummyInput(name);
-  if (title) {
-    inputItem.appendField(title);
-  }
-  return inputItem;
-};
-
-/**
- * Updates the shape of a mutable block.
- * @param {string} name The name of the input type field.
- * @param {number} pos position of the field
- * @return {array Element} array of added elements.
- */
-Blockly.Block.prototype.appendAddSubNamedInput = function(name,pos,title) {
-  var newName = this.getAddSubName(name,pos);
-  var inputItem = null;
-  var field = null;
-  var itemCount = this.getItemCount();
-
-  if (itemCount[name]) {
-    inputItem = this.appendValueInput(newName)
-                    .setCheck(this.checks_[name],!!this.checks_[name])
-                    .setAlign(Blockly.ALIGN_RIGHT);
-    if (title) {
-      inputItem.appendField(title);
-    }
-    inputItem.appendField(this.names[pos]);
-  } else {
-    var title = '';
-    if (this.titles_[name]) {
-      title = this.titles_[name].empty;
-    }
-    inputItem = this.appendAddSubNamedEmptyInput(newName, title);
-  }
-  
-//  if(pos === 0){
-//    
-//  }
-//  else{
-//    if(itemCount[name]>0){
-//      inputItem.appendField(this.names[pos-1]);
-//    }
-  }
-  
-  // if (pos === 0) {
-  //   field = new Blockly.FieldClickImage(this.addPng, 17, 17,
-  //                                       Blockly.Msg.CLICK_ADD_TOOLTIP);
-  //   field.setChangeHandler(this.doAddFieldNamed);
-  // }
-  // else {
-//  if(itemCount[name]>0){
-//    field = new Blockly.FieldClickImage(this.subPng, 17, 17,
-//                                        Blockly.Msg.CLICK_REMOVE_TOOLTIP);
-//    field.setChangeHandler(this.doRemoveField);
-//    field.setPrivate({name: name, pos: pos});
-//    inputItem.appendField(field);
-//  }
-  // }
-  return [inputItem];
-};
-
-/**
- * Updates the shape of a mutable block.
- * @param {string} name The name of the input type field.
- * @param {number} pos position of the field to be removed
- * @throws {goog.asserts.AssertionError} if the field is not present.
- */
-Blockly.Block.prototype.updateAddSubNamedShape = function() {
-  var itemCount = this.getItemCount();
-  for (var name in itemCount) {
-    if (itemCount.hasOwnProperty(name)) {
-      // First get rid of anything which is beyond our count
-      var pos = itemCount[name];
-      var elemName = this.getAddSubName(name,pos);
-      while(this.getInput(elemName) != null) {
-        this.removeInput(elemName);
-        pos++;
-        elemName = this.getAddSubName(name,pos);
-      }
-      if (itemCount[name]) {
-        // Now add in the ones which we are missing.  Note that
-        // we need to make sure that they get put AFTER the one of
-        // the same number
-        var name0 = this.getAddSubName(name,0);
-        var inputIndex = this.getInputIndex(name0);
-        if (inputIndex == -1) {
-          // This is the case where we don't have any blocks at all, not even
-          // the initial one, so we just add to the end
-          var title = '';
-          if (this.titles_[name]) {
-            title = this.titles_[name].normal;
-          }
-          this.appendAddSubNamedInput(name, 0, title);
-          var inputIndex = this.getInputIndex(name0);
-          goog.asserts.assert(inputIndex != -1,
-                              'Named input "%s" not found.', name0);
-        }
-        if (inputIndex !== -1) {
-          inputIndex++;
-          for (pos = 1; pos < itemCount[name];pos++,inputIndex++) {
-            var newName = this.getAddSubName(name,pos);
-            var inputItem = this.getInput(newName);
-            if (inputItem == null) {
-              // We have to add one
-              var inputItems = this.appendAddSubNamedInput(name,pos);
-              // Now see if we need to move them.
-              if (inputIndex < this.inputList.length-1) {
-                // We move them from the bottom to the top.
-                // Because they start at the bottom, we move them to the same
-                // place and they will stay in the same order.
-                for (var nItem = 0; nItem < inputItems.length; nItem++) {
-                  this.moveNumberedInputBefore(this.inputList.length-1,
-                                               inputIndex);
-                }
-              }
-            }
-          }
-        }
-
-        inputItem = this.getInput(name0);
-        var subFieldName0 = name0+'_sub';
-        var hasSubField0 = this.getField(subFieldName0);
-        // Now see what the main one has for fields
-        // if (itemCount[name] === 1) {
-        //   // Shouldn't have a sub field if this is the only entry
-        //   if (hasSubField0) {
-        //     inputItem.removeField(subFieldName0);
-        //   }
-        // } else {
-        //   if (!hasSubField0) {
-        //     var field = new Blockly.FieldClickImage(this.subPng, 17, 17,
-        //                                       Blockly.Msg.CLICK_REMOVE_TOOLTIP);
-        //     field.setPrivate({name: name, pos: 0});
-        //     field.setChangeHandler(this.doRemoveField);
-        //     inputItem.appendField(field, subFieldName0);
-        //   }
-        // }
-      } else {
-        var name0 = this.getAddSubName(name,0);
-        var title = '';
-        if (this.titles_[name]) {
-          title = this.titles_[name].empty;
-        }
-        this.removeInput(name0,true);
-        this.appendAddSubNamedInput(name, 0, title);
-      }
-    }
-  }
-  //
-  // Make sure that we don't have anything which might be showing up
-  // as a false connection
-  //
-  if (this.rendered) {
-    this.render();
-    this.bumpNeighbours_();
-    // TODO JCOA: Use Event.fire? to enable undo and redo. Blockly.Events.fire(new Blockly.Events.Change(
-    //this.workspace.fireChangeEvent();
-    //this.workspace.fireChangeListener();
-  }
-};
-
-// TODO: JCOA Fix domToMutationAddSub and mutationToDomAddSub using normal mutation function
-//       Maybe not possible since AddSub can delete fields by name and reorder the list.
-/**
-  * Parse XML to restore the list inputs.
-  * @param {!Element} xmlElement XML storage element.
-  * @this Blockly.Block
-  */
-Blockly.Block.prototype.domToMutationAddSubNamed = function(xmlElement) {
-  var itemCount = this.getItemCount();
-  for (var name in itemCount) {
-    if (itemCount.hasOwnProperty(name)) {
-      this.setItemCount(name, parseInt(xmlElement.getAttribute(name),10));
-    }
-  }
-  var names1 = xmlElement.getAttribute("names");
-  this.names = names1.split(',');
-  this.updateAddSubNamedShape();
-};
-
-/**
- * Create XML to represent list inputs.
- * @return {Element} XML storage element.
- * @this Blockly.Block
- */
-Blockly.Block.prototype.mutationToDomAddSubNamed = function() {
-  var container = document.createElement('mutation');
-  var itemCount = this.getItemCount();
-  for (var name in itemCount) {
-    if (itemCount.hasOwnProperty(name)) {
-      container.setAttribute(name, itemCount[name]);
-    }
-  }
-  container.setAttribute('names', this.names.toString());
-  return container;
-};
-
-/**
- * Creates an add/subtract mutable field.
- * @param {string} title Any title input fields for the line.
- * @param {string} name The name of the input type field.
- * @param {string} checks input check parameter for the fields
- * @param {string} emptytitle Optional string for when a group is empty
- */
-Blockly.Block.prototype.appendAddSubNamed = function(title,name,checks,
-                                                     emptytitle) {
-  //
-  // Specify the override functions
-  //
-  this.domToMutation   = this.domToMutationAddSubNamed;
-  this.mutationToDom   = this.mutationToDomAddSubNamed;
-  this.updateShape_    = this.updateAddSubNamedShape;
-
-  var root = this;
-  if (typeof this.titles_ === 'undefined') {
-    this.checks_ = {};
-    this.titles_ = {};
-  }
-
-  this.names = [];
-  
-  if (emptytitle) {
-    this.titles_[name] = {normal: title, empty: emptytitle};
-  }
-  this.setItemCount(name, 0);
-  this.checks_[name] = checks;
-
-  // This adds an extra plus button
-//  var field = null;
-//  field = new Blockly.FieldClickImage(this.addPng, 17, 17,
-//                                      Blockly.Msg.CLICK_ADD_TOOLTIP);
-//  field.setChangeHandler(this.doAddFieldNamed);
-//  field.setPrivate({name: name, pos: 0});
-//  this.appendDummyInput()
-//      .appendField(field)
-//      .appendField("  ");
-
-//  this.appendAddSubNamedInput(name, 0, title);
 };

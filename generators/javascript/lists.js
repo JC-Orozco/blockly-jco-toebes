@@ -38,11 +38,14 @@ Blockly.JavaScript['lists_create_with'] = function(block) {
   // Create a list with any number of elements of any type.
   var code = new Array(block.itemCount_);
   for (var n = 0; n < block.itemCount_; n++) {
-    code[n] = Blockly.JavaScript.valueToCode(block, 'ADD' + n,
+    // code[n] = Blockly.JavaScript.valueToCode(block, 'ADD' + n,
+    //     Blockly.JavaScript.ORDER_COMMA) || 'null';
+    // TODO: Fix the naming on the AddSubGroup block and use code above
+    code[n] = Blockly.JavaScript.valueToCode(block, 'items' + n,
         Blockly.JavaScript.ORDER_COMMA) || 'null';
   }
-  code = '[' + code.join(', ') + ']';
-  return [code, Blockly.JavaScript.ORDER_ATOMIC];
+  var code_text = '[' + code.join(', ') + ']';
+  return [code_text, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
 Blockly.JavaScript['lists_repeat'] = function(block) {
