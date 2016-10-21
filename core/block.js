@@ -2542,8 +2542,10 @@ Blockly.Block.prototype.appendAddSubNamedInput = function(name,pos,title) {
 
   if (itemCount[name]) {
     if(pos<1){
-      //inputItem = this.appendDummyInput(newName);
-      inputItem = this.appendValueInput(newName);
+      // TODO: JCO How to avoid making a new line on pos = 0.
+      //   the logic on the update function appears to depend on item0 to exist.
+      inputItem = this.appendDummyInput(newName);
+      //inputItem = this.appendValueInput(newName);
     } else {
       inputItem = this.appendValueInput(newName)
                       .setCheck(this.checks_[name],!!this.checks_[name])
@@ -2551,7 +2553,7 @@ Blockly.Block.prototype.appendAddSubNamedInput = function(name,pos,title) {
       if (title) {
         inputItem.appendField(title);
       }
-      inputItem.appendField(this.names[pos]);
+      inputItem.appendField(this.names[pos-1]);
     }
   } else {
     var title = '';
