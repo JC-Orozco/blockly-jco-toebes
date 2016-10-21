@@ -2541,13 +2541,18 @@ Blockly.Block.prototype.appendAddSubNamedInput = function(name,pos,title) {
   var itemCount = this.getItemCount();
 
   if (itemCount[name]) {
-    inputItem = this.appendValueInput(newName)
-                    .setCheck(this.checks_[name],!!this.checks_[name])
-                    .setAlign(Blockly.ALIGN_RIGHT);
-    if (title) {
-      inputItem.appendField(title);
+    if(pos<1){
+      //inputItem = this.appendDummyInput(newName);
+      inputItem = this.appendValueInput(newName);
+    } else {
+      inputItem = this.appendValueInput(newName)
+                      .setCheck(this.checks_[name],!!this.checks_[name])
+                      .setAlign(Blockly.ALIGN_RIGHT);
+      if (title) {
+        inputItem.appendField(title);
+      }
+      inputItem.appendField(this.names[pos]);
     }
-    inputItem.appendField(this.names[pos]);
   } else {
     var title = '';
     if (this.titles_[name]) {
@@ -2555,15 +2560,24 @@ Blockly.Block.prototype.appendAddSubNamedInput = function(name,pos,title) {
     }
     inputItem = this.appendAddSubNamedEmptyInput(newName, title);
   }
+
   
-//  if(pos === 0){
-//    
-//  }
-//  else{
-//    if(itemCount[name]>0){
-//      inputItem.appendField(this.names[pos-1]);
+//  if (itemCount[name]) {
+//    inputItem = this.appendValueInput(newName)
+//                    .setCheck(this.checks_[name],!!this.checks_[name])
+//                    .setAlign(Blockly.ALIGN_RIGHT);
+//    if (title) {
+//      inputItem.appendField(title);
 //    }
-  }
+//    inputItem.appendField(this.names[pos]);
+//  } else {
+//    var title = '';
+//    if (this.titles_[name]) {
+//      title = this.titles_[name].empty;
+//    }
+//    inputItem = this.appendAddSubNamedEmptyInput(newName, title);
+//  }
+  
   
   // if (pos === 0) {
   //   field = new Blockly.FieldClickImage(this.addPng, 17, 17,
@@ -2682,8 +2696,6 @@ Blockly.Block.prototype.updateAddSubNamedShape = function() {
   }
 };
 
-// TODO: JCOA Fix domToMutationAddSub and mutationToDomAddSub using normal mutation function
-//       Maybe not possible since AddSub can delete fields by name and reorder the list.
 /**
   * Parse XML to restore the list inputs.
   * @param {!Element} xmlElement XML storage element.
