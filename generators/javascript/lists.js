@@ -36,12 +36,12 @@ Blockly.JavaScript['lists_create_empty'] = function(block) {
 
 Blockly.JavaScript['lists_create_with'] = function(block) {
   // Create a list with any number of elements of any type.
-  var code = new Array(block.itemCount_);
-  for (var n = 0; n < block.itemCount_; n++) {
+  var code = new Array(block.itemCount_-1);
+  for (var n = 1; n < block.itemCount_; n++) {
     // code[n] = Blockly.JavaScript.valueToCode(block, 'ADD' + n,
     //     Blockly.JavaScript.ORDER_COMMA) || 'null';
     // TODO: Fix the naming on the AddSubGroup block and use code above
-    code[n] = Blockly.JavaScript.valueToCode(block, 'items' + n,
+    code[n-1] = Blockly.JavaScript.valueToCode(block, 'items' + n,
         Blockly.JavaScript.ORDER_COMMA) || 'null';
   }
   var code_text = '[' + code.join(', ') + ']';

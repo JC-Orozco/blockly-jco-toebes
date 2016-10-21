@@ -1495,7 +1495,7 @@ Blockly.Block.prototype.doRemoveField = function(field) {
   if (this.titles_[name]) {
     minitems = 0;
   }
-  if (itemCount[name] > minitems) {
+  if (itemCount[name] > minitems+1) {
     itemCount[name]--;
     this.setItemCount(name, itemCount[name]);
   }
@@ -1610,11 +1610,16 @@ Blockly.Block.prototype.appendAddSubInput = function(name,pos,title) {
   var itemCount = this.getItemCount();
 
   if (itemCount[name]) {
-    inputItem = this.appendValueInput(newName)
-                    .setCheck(this.checks_[name],!!this.checks_[name])
-                    .setAlign(Blockly.ALIGN_RIGHT);
-    if (title) {
-      inputItem.appendField(title);
+    if(pos < 1){ // 0({
+      inputItem = this.appendDummyInput(newName) // Add name so it can get found.
+                      .appendField(title);
+    } else {
+      inputItem = this.appendValueInput(newName)
+                      .setCheck(this.checks_[name],!!this.checks_[name])
+                      .setAlign(Blockly.ALIGN_RIGHT);
+      if (title) {
+        inputItem.appendField(title);
+      }
     }
   } else {
     var title = '';
@@ -1623,20 +1628,22 @@ Blockly.Block.prototype.appendAddSubInput = function(name,pos,title) {
     }
     inputItem = this.appendAddSubEmptyInput(newName, title);
   }
-  // if (pos === 0) {
-  //   field = new Blockly.FieldClickImage(this.addPng, 17, 17,
-  //                                       Blockly.Msg.CLICK_ADD_TOOLTIP);
-  //   field.setChangeHandler(this.doAddField);
-  // }
-  // else {
-  if(itemCount[name]>0){
-    field = new Blockly.FieldClickImage(this.subPng, 17, 17,
-                                        Blockly.Msg.CLICK_REMOVE_TOOLTIP);
-    field.setChangeHandler(this.doRemoveField);
-    field.setPrivate({name: name, pos: pos});
-    inputItem.appendField(field);
+  if (pos === 0) {
+     field = new Blockly.FieldClickImage(this.addPng, 17, 17,
+                                         Blockly.Msg.CLICK_ADD_TOOLTIP);
+     field.setChangeHandler(this.doAddField);
+     field.setPrivate({name: name, pos: 0});
+     inputItem.appendField(field);
   }
-  // }
+  else {
+    if(itemCount[name]>1){
+      field = new Blockly.FieldClickImage(this.subPng, 17, 17,
+                                          Blockly.Msg.CLICK_REMOVE_TOOLTIP);
+      field.setChangeHandler(this.doRemoveField);
+      field.setPrivate({name: name, pos: pos});
+      inputItem.appendField(field);
+    }
+  }
   return [inputItem];
 };
 
@@ -1662,7 +1669,7 @@ Blockly.Block.prototype.updateAddSubShape = function() {
         // Now add in the ones which we are missing.  Note that
         // we need to make sure that they get put AFTER the one of
         // the same number
-        var name0 = this.getAddSubName(name,0);
+        var name0 = this.getAddSubName(name,0); // 0);
         var inputIndex = this.getInputIndex(name0);
         if (inputIndex == -1) {
           // This is the case where we don't have any blocks at all, not even
@@ -1671,7 +1678,7 @@ Blockly.Block.prototype.updateAddSubShape = function() {
           if (this.titles_[name]) {
             title = this.titles_[name].normal;
           }
-          this.appendAddSubInput(name, 0, title);
+          this.appendAddSubInput(name, 0, title); // 0, title);
           var inputIndex = this.getInputIndex(name0);
           goog.asserts.assert(inputIndex != -1,
                               'Named input "%s" not found.', name0);
@@ -1717,13 +1724,13 @@ Blockly.Block.prototype.updateAddSubShape = function() {
         //   }
         // }
       } else {
-        var name0 = this.getAddSubName(name,0);
+        var name0 = this.getAddSubName(name,0); // 0);
         var title = '';
         if (this.titles_[name]) {
           title = this.titles_[name].empty;
         }
         this.removeInput(name0,true);
-        this.appendAddSubInput(name, 0, title);
+        this.appendAddSubInput(name, 0, title);  // 0, title);
       }
     }
   }
@@ -1802,14 +1809,14 @@ Blockly.Block.prototype.appendAddSubGroup = function(title,name,checks,
   this.checks_[name] = checks;
 
   // This adds an extra plus button
-  var field = null;
-  field = new Blockly.FieldClickImage(this.addPng, 17, 17,
-                                      Blockly.Msg.CLICK_ADD_TOOLTIP);
-  field.setChangeHandler(this.doAddField);
-  field.setPrivate({name: name, pos: 0});
-  this.appendDummyInput()
-      .appendField(field)
-      .appendField("  ");
+//  var field = null;
+//  field = new Blockly.FieldClickImage(this.addPng, 17, 17,
+//                                      Blockly.Msg.CLICK_ADD_TOOLTIP);
+//  field.setChangeHandler(this.doAddField);
+//  field.setPrivate({name: name, pos: 0});
+//  this.appendDummyInput()
+//      .appendField(field)
+//      .appendField("  ");
 
   this.appendAddSubInput(name, 0, title);
 };
