@@ -68,9 +68,10 @@ Blockly.JavaScript['maps_create_with'] = function(block) {
   // Create a map with any number of elements of any type.
   //var text_name = block.getFieldValue('NAME');
   //var code_text = 'var '+text_name+' = {\n'
-  var code = new Array(block.itemCount_);
-  for (var n = 0; n < block.itemCount_; n++) {
-    code[n] = Blockly.JavaScript.valueToCode(block, 'ADD' + n,
+  var code = new Array(block.itemCount_-1);
+  //for (var n = 0; n < block.itemCount_; n++) { // TODO: JCOA Go back to this line and delete -1 above and below when AddSubGroup item count is fixed to represent the real number of items and not items+1
+  for (var n = 1; n < block.itemCount_; n++) {
+    code[n-1] = Blockly.JavaScript.valueToCode(block, 'ADD' + n,
         Blockly.JavaScript.ORDER_COMMA) || 'null';
     // TODO: Fix the naming on the AddSubGroup block and use code above
     // code[n] = Blockly.JavaScript.valueToCode(block, 'items' + n,
