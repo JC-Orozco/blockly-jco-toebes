@@ -1491,10 +1491,12 @@ Blockly.Block.prototype.doRemoveField = function(field) {
   var pos = privateData.pos;
   var itemCount = this.getItemCount();
   var limit = itemCount[name];
-  var minitems = 1;
-  if (this.titles_[name]) {
-    minitems = 0;
-  }
+
+  var minitems = 0;
+  //  var minitems = 1;
+  //  if (this.titles_[name]) {
+  //    minitems = 0;
+  //  }
   if (itemCount[name] > minitems+1) {
     itemCount[name]--;
     this.setItemCount(name, itemCount[name]);
