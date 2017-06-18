@@ -1114,7 +1114,7 @@ Blockly.Block.prototype.interpolate_ = function(message, args, lastDummyAlign) {
             if (fieldStack.length) {
               input = this.appendDummyInput();
             }
-            this.appendAddSubStatement(element['title'],
+            this.appendAddSubNamedEd(element['title'],
                                        element['name'],
                                        element['checks']);
             break;          
@@ -1124,7 +1124,7 @@ Blockly.Block.prototype.interpolate_ = function(message, args, lastDummyAlign) {
             if (fieldStack.length) {
               input = this.appendDummyInput();
             }
-            this.appendAddSubStatement(element['title'],
+            this.appendAddSubNamed(element['title'],
                                        element['name'],
                                        element['checks']);
             break;          
